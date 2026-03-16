@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Phone, MapPin, Clock, Mail, Instagram, Facebook, ChevronLeft, ChevronRight, Star, MessageCircle, Menu as MenuIcon, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 
 // --- Data ---
 const menuData = {
@@ -87,7 +87,7 @@ const Navbar = () => {
           <div className="flex-shrink-0 flex items-center">
             <a href="#hero" className="flex items-center gap-3">
               <img src="https://res.cloudinary.com/dfbsqy5ul/image/upload/v1773700369/301779419_391964586434711_3100280883263449627_n_lu1abq.png" alt="El Panduku Logo" className="h-12 w-auto rounded-full" referrerPolicy="no-referrer" />
-              <span className="font-sans font-bold text-2xl text-burgundy tracking-tight hidden sm:block">EL PANDUKU</span>
+              <span className="font-sans font-bold text-2xl text-burgundy tracking-tight">EL PANDUKU</span>
             </a>
           </div>
           
@@ -151,14 +151,18 @@ const Navbar = () => {
 };
 
 const Hero = () => {
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 1000], [0, 400]);
+
   return (
     <section id="hero" className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Parallax feel */}
-      <div 
+      <motion.div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: 'url("https://res.cloudinary.com/dfbsqy5ul/image/upload/v1773700720/482239271_1744430892781674_751125021467174630_n_adxqbf.jpg")',
-          backgroundAttachment: 'fixed'
+          y,
+          scale: 1.1 // to prevent edges from showing during parallax
         }}
       />
       {/* Overlay */}
@@ -220,18 +224,30 @@ const Hero = () => {
 
 const About = () => {
   return (
-    <section id="about" className="py-20 bg-cream">
+    <section id="about" className="py-20 bg-cream overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center gap-12">
-          <div className="w-full lg:w-1/2">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="w-full lg:w-1/2"
+          >
             <img 
               src="https://res.cloudinary.com/dfbsqy5ul/image/upload/v1773700369/475038081_923471933283971_6376165971255839079_n_wzwqu1.jpg" 
               alt="Interior del Restaurante El Panduku" 
               className="rounded-2xl shadow-xl object-cover w-full h-[400px] lg:h-[500px]"
               referrerPolicy="no-referrer"
             />
-          </div>
-          <div className="w-full lg:w-1/2 space-y-6">
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="w-full lg:w-1/2 space-y-6"
+          >
             <h2 className="text-4xl md:text-5xl font-sans font-bold text-burgundy">Sobre Nosotros</h2>
             <div className="w-20 h-1 bg-burgundy rounded-full"></div>
             <p className="text-lg leading-relaxed text-gray-800">
@@ -245,15 +261,21 @@ const About = () => {
                 Ver la Carta
               </a>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
   );
 };
 
-const MenuSection = ({ title, items }: { title: string, items: any[] }) => (
-  <div className="mb-12">
+const MenuSection = ({ title, items, index }: { title: string, items: any[], index: number }) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 30 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, margin: "-50px" }}
+    transition={{ duration: 0.6, delay: index * 0.1 }}
+    className="mb-12"
+  >
     <h3 className="text-2xl font-sans font-bold text-burgundy mb-6 border-b border-burgundy/20 pb-2">{title}</h3>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
       {items.map((item, idx) => (
@@ -266,42 +288,61 @@ const MenuSection = ({ title, items }: { title: string, items: any[] }) => (
         </div>
       ))}
     </div>
-  </div>
+  </motion.div>
 );
 
 const Menu = () => {
   return (
-    <section id="menu" className="py-20 bg-white">
+    <section id="menu" className="py-20 bg-white overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
           <h2 className="text-4xl md:text-5xl font-sans font-bold text-burgundy mb-4">Nuestra Carta</h2>
           <div className="w-24 h-1 bg-burgundy rounded-full mx-auto"></div>
-        </div>
+        </motion.div>
 
-        <MenuSection title="Menús Especiales" items={menuData.menus} />
-        <MenuSection title="Entrantes" items={menuData.entrantes} />
-        <MenuSection title="Ensaladas" items={menuData.ensaladas} />
-        <MenuSection title="De la Mar" items={menuData.mar} />
-        <MenuSection title="Carnes" items={menuData.carnes} />
-        <MenuSection title="Especialidad Panduku" items={menuData.especialidad} />
-        <MenuSection title="Bebidas, Vinos y Cavas" items={menuData.bebidas} />
+        <MenuSection title="Menús Especiales" items={menuData.menus} index={0} />
+        <MenuSection title="Entrantes" items={menuData.entrantes} index={1} />
+        <MenuSection title="Ensaladas" items={menuData.ensaladas} index={2} />
+        <MenuSection title="De la Mar" items={menuData.mar} index={3} />
+        <MenuSection title="Carnes" items={menuData.carnes} index={4} />
+        <MenuSection title="Especialidad Panduku" items={menuData.especialidad} index={5} />
+        <MenuSection title="Bebidas, Vinos y Cavas" items={menuData.bebidas} index={6} />
 
         {/* Gallery */}
-        <div className="mt-20">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mt-20"
+        >
           <h3 className="text-3xl font-sans font-bold text-center text-burgundy mb-10">Nuestros Platos</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {galleryImages.map((src, idx) => (
-              <div key={idx} className="aspect-square overflow-hidden rounded-xl shadow-sm">
+              <motion.div 
+                key={idx} 
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="aspect-square overflow-hidden rounded-xl shadow-sm"
+              >
                 <img 
                   src={src} 
                   alt={`Plato ${idx + 1}`} 
                   className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -332,15 +373,27 @@ const Reviews = () => {
   );
 
   return (
-    <section id="reviews" className="py-20 bg-cream">
+    <section id="reviews" className="py-20 bg-cream overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
           <h2 className="text-4xl md:text-5xl font-sans font-bold text-burgundy mb-4">Opiniones</h2>
           <div className="w-24 h-1 bg-burgundy rounded-full mx-auto mb-6"></div>
           <p className="text-gray-700">Lo que dicen nuestros clientes</p>
-        </div>
+        </motion.div>
 
-        <div className="relative px-4 md:px-12">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="relative px-4 md:px-12"
+        >
           {/* Carousel Controls */}
           <button 
             onClick={prevSlide}
@@ -390,7 +443,7 @@ const Reviews = () => {
               />
             ))}
           </div>
-        </div>
+        </motion.div>
 
         <div className="mt-12 text-center">
           <a 
@@ -410,15 +463,27 @@ const Reviews = () => {
 
 const Location = () => {
   return (
-    <section id="location" className="py-20 bg-white">
+    <section id="location" className="py-20 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
           <h2 className="text-4xl md:text-5xl font-sans font-bold text-burgundy mb-4">Visítanos</h2>
           <div className="w-24 h-1 bg-burgundy rounded-full mx-auto"></div>
-        </div>
+        </motion.div>
 
         <div className="flex flex-col lg:flex-row gap-12">
-          <div className="w-full lg:w-1/3 space-y-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="w-full lg:w-1/3 space-y-8"
+          >
             <div className="bg-cream p-8 rounded-2xl shadow-sm border border-burgundy/10">
               <h3 className="text-2xl font-sans font-bold text-burgundy mb-4">Ubicación</h3>
               <p className="text-gray-800 mb-4 leading-relaxed">
@@ -450,9 +515,15 @@ const Location = () => {
                 </a>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="w-full lg:w-2/3 h-[400px] lg:h-auto min-h-[500px] rounded-2xl overflow-hidden shadow-md border border-gray-200">
+          <motion.div 
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="w-full lg:w-2/3 h-[400px] lg:h-auto min-h-[500px] rounded-2xl overflow-hidden shadow-md border border-gray-200"
+          >
             <iframe 
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2899.645706917637!2d-5.77942922340263!3d43.38307357111663!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd368b00514597e5%3A0x35fced80f49f4450!2sRestaurante%20Panduku!5e0!3m2!1ses!2ses!4v1710600000000!5m2!1ses!2ses" 
               width="100%" 
@@ -463,7 +534,7 @@ const Location = () => {
               referrerPolicy="no-referrer-when-downgrade"
               title="Mapa de ubicación Restaurante El Panduku"
             ></iframe>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -471,22 +542,39 @@ const Location = () => {
 };
 
 const Reservations = () => {
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
+
   return (
     <section id="reservations" className="relative py-20 bg-cream overflow-hidden">
       {/* Background Image */}
-      <div 
+      <motion.div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-20"
         style={{ 
           backgroundImage: 'url("https://res.cloudinary.com/dfbsqy5ul/image/upload/v1773700369/475038081_923471933283971_6376165971255839079_n_wzwqu1.jpg")',
-          backgroundAttachment: 'fixed'
+          y,
+          scale: 1.1
         }}
       />
       
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-4xl md:text-5xl font-sans font-bold text-burgundy mb-4">Reservas</h2>
-        <div className="w-24 h-1 bg-burgundy rounded-full mx-auto mb-10"></div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-4xl md:text-5xl font-sans font-bold text-burgundy mb-4">Reservas</h2>
+          <div className="w-24 h-1 bg-burgundy rounded-full mx-auto mb-10"></div>
+        </motion.div>
         
-        <div className="bg-white/95 backdrop-blur-sm p-8 md:p-12 rounded-3xl shadow-xl border border-burgundy/10">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="bg-white/95 backdrop-blur-sm p-8 md:p-12 rounded-3xl shadow-xl border border-burgundy/10"
+        >
           <p className="text-xl text-gray-800 mb-10 leading-relaxed">
             Estaremos encantados de recibirte. Puedes realizar tu reserva de dos formas muy sencillas:
           </p>
@@ -522,7 +610,7 @@ const Reservations = () => {
           <p className="mt-10 text-gray-600 italic text-sm">
             * No se aceptan reservas por correo electrónico.
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -530,9 +618,15 @@ const Reservations = () => {
 
 const Footer = () => {
   return (
-    <footer className="bg-burgundy text-cream pt-16 pb-8">
+    <footer className="bg-burgundy text-cream pt-16 pb-8 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12"
+        >
           {/* Brand */}
           <div>
             <div className="mb-6 flex items-center gap-3">
@@ -591,7 +685,7 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-        </div>
+        </motion.div>
 
         <div className="border-t border-cream/20 pt-8 text-center text-cream/60 text-sm font-sans">
           <p>&copy; {new Date().getFullYear()} Restaurante El Panduku. Todos los derechos reservados.</p>
